@@ -1,28 +1,59 @@
 CC = g++
-CFLAGS = -std=c++11 -Wall -Wextra -pedantic -g
-INC = -Iinclude
 
-LIBS = -lSDL2 -lSDL2_image -lSDL2_mixer
+SRC_DIR = src
+OBJ_DIR = obj
+INC_DIR = include
 
-SRC = $(wildcard src/*.cpp)
-OBJ = $(patsubst src/%.cpp, obj/%.o, $(SRC))
-TARGET = bin/Jogo
+# Nome do executável final gerado na raiz
+TARGET = Trabalho1
 
-all: directories $(TARGET)
+# Detecção confiável de SO
+ifeq ($(OS), Windows_NT)
+    PLATFORM := Windows
+else
+    PLATFORM := $(shell uname -s 2>/dev/null || echo Unknown)
+endif
 
-$(TARGET): $(OBJ)
-	$(CC) $(OBJ) -o $@ $(LIBS)
+ifeq ($(PLATFORM), Windows)
+    SDL_PATH = C:/SDL2
+    CFLAGS   = -Wall -g -std=c++17 -I$(INC_DIR) -I$(SDL_PATH)/include
+    LDFLAGS  = -L$(SDL_PATH)/lib -lmingw32 -lSDL2main -lSDL2 -lSDL2_image -lSDL2_mixer
+    TARGET   := $(TARGET).exe
+    MKDIR    = if not exist $(1) mkdir $(1)
+    RM       = rmdir /S /Q $(1) 2> NUL || exit 0
+    RM_FILE  = del /Q $(1) 2> NUL || exit 0
+    EXEC     = $(TARGET)
+else
+    CFLAGS   = -Wall -g -std=c++17 -I$(INC_DIR) $(shell sdl2-config --cflags)
+    LDFLAGS  = $(shell sdl2-config --libs) -lSDL2_image -lSDL2_mixer
+    MKDIR    = mkdir -p $(1)
+    RM       = rm -rf $(1)
+    RM_FILE  = rm -f $(1)
+    EXEC     = ./$(TARGET)
+endif
 
-obj/%.o: src/%.cpp
-	$(CC) $(CFLAGS) $(INC) -c $< -o $@
+SRCS = $(wildcard $(SRC_DIR)/*.cpp)
+OBJS = $(patsubst $(SRC_DIR)/%.cpp, $(OBJ_DIR)/%.o, $(SRCS))
 
-directories:
-	mkdir -p bin obj
+all: folders $(TARGET)
+
+folders:
+	@$(call MKDIR, $(OBJ_DIR))
+
+$(TARGET): $(OBJS)
+	$(CC) $(OBJS) -o $@ $(LDFLAGS)
+
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
+	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	rm -rf obj $(TARGET)
+	@$(call RM, $(OBJ_DIR))
+	@$(call RM_FILE, $(TARGET))
 
 run: all
-	./$(TARGET)
+	$(EXEC)
 
-.PHONY: all directories clean run
+debug: CFLAGS += -DDEBUG
+debug: all
+
+.PHONY: all folders clean run debug
