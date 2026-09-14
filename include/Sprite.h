@@ -1,20 +1,19 @@
 #ifndef SPRITE_H
 #define SPRITE_H
 
+#include <string>
+
 #define INCLUDE_SDL
 #define INCLUDE_SDL_IMAGE
 #include "SDL_include.h"
-#include <string>
 
 class Sprite {
 public:
     Sprite();
-    explicit Sprite(const std::string& file);
-
+    explicit Sprite(const std::string& file, int frameCountW = 1, int frameCountH = 1);
     ~Sprite();
 
     void Open(const std::string& file);
-
     void SetClip(int x, int y, int w, int h);
     void Render(int x, int y);
 
@@ -22,11 +21,19 @@ public:
     int GetHeight() const;
     bool IsOpen() const;
 
+    // Novas funcoes de animacao
+    void SetFrame(int frame);
+    void SetFrameCount(int frameCountW, int frameCountH);
+
 private:
-    SDL_Texture* m_texture; //textura carregadfa
+    SDL_Texture* m_texture;
     int m_width;
     int m_height;
-    SDL_Rect m_clipRect; //retangulo do clipping
+    SDL_Rect m_clipRect;
+
+    // Controle de matriz de frames
+    int m_frameCountW;
+    int m_frameCountH;
 };
 
 #endif

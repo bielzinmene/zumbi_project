@@ -1,26 +1,29 @@
-#include "../include/Sprite.h"
-#include "../include/Game.h"
+#include "Sprite.h"
+#include "Game.h"
 #include <iostream>
 
 Sprite::Sprite()
-    : m_texture(nullptr), m_width(0), m_height(0), m_clipRect{0, 0, 0, 0} {}
+    : m_texture(nullptr), m_width(0), m_height(0), m_clipRect{0, 0, 0, 0}, m_frameCountW(1), m_frameCountH(1) {}
 
-Sprite::Sprite(const std::string& file) : Sprite() {
+Sprite::Sprite(const std::string& file, int frameCountW, int frameCountH)
+    : Sprite() {
+    m_frameCountW = frameCountW;
+    m_frameCountH = frameCountH;
     Open(file);
-} //construtir
+}
 
 Sprite::~Sprite() {
     if (m_texture != nullptr) {
         SDL_DestroyTexture(m_texture);
         m_texture = nullptr;
     }
-} //destruidor
+}
 
 void Sprite::Open(const std::string& file) {
     if (m_texture != nullptr) {
         SDL_DestroyTexture(m_texture);
         m_texture = nullptr;
-    } //carega imagem da textura
+    }
 
     SDL_Renderer* renderer = Game::GetInstance().GetRenderer();
     m_texture = IMG_LoadTexture(renderer, file.c_str());
@@ -32,8 +35,7 @@ void Sprite::Open(const std::string& file) {
     }
 
     if (SDL_QueryTexture(m_texture, nullptr, nullptr, &m_width, &m_height) != 0) {
-        std::cerr << "[Sprite] Falha ao consultar dimensoes da textura: "
-                  << SDL_GetError() << std::endl;
+        std::cerr << "[Sprite] Falha ao consultar dimensoes: " << SDL_GetError() << std::endl;
         return;
     }
 
@@ -63,13 +65,28 @@ void Sprite::Render(int x, int y) {
 }
 
 int Sprite::GetWidth() const {
-    return m_width;
+    return m_width / m_frameCountW;
 }
 
 int Sprite::GetHeight() const {
-    return m_height;
+    return m_height / m_frameCountH;
 }
 
 bool Sprite::IsOpen() const {
     return m_texture != nullptr;
+}
+
+void Sprite::SetFrameCount(int frameCountW, int frameCountH) {
+    m_frameCountW = frameCountW;
+    m_frameCountH = frameCountH;
+}
+
+void Sprite::SetFrame(int frame) {
+    int frameW = GetWidth();
+    int frameH = GetHeight();
+
+    int currentX = (frame % m_frameCountW) * frameW;
+    int currentY = (frame / m_frameCountW) * frameH;
+
+    SetClip(currentX, currentY, frameW, frameH);
 }

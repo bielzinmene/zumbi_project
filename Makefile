@@ -11,7 +11,7 @@ TARGET = Trabalho1
 ifeq ($(OS), Windows_NT)
     PLATFORM := Windows
 else
-    PLATFORM := $(shell uname -s 2>/dev/null || echo Unknown)
+    PLATFORM := $(shell uname -s 2>/dev/null || echo Urunnknown)
 endif
 
 ifeq ($(PLATFORM), Windows)
