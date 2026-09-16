@@ -25,4 +25,4 @@ Certifique-se de ter os pacotes de desenvolvimento da SDL2 instalados no seu sis
   make
 - `2º passo` - Para rodar o jogo após compilado, execute o comando abaixo no terminal:
   ```bash
-  make run
+  make rungit
