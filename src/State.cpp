@@ -2,19 +2,22 @@
 #include "SpriteRenderer.h"
 #include "Zombie.h"
 #include "SDL_include.h"
-
-// Note que SpriteRenderer vai requerer o include dele aqui em breve para o BG
+#include "TileSet.h"
+#include "TileMap.h"
 
 State::State() : m_quitRequested(false) {
-    LoadAssets(); // (Carrega a música aqui dentro como antes)
+    LoadAssets(); //carega musica
     m_music.Play(-1);
 
-    // 1. Adicionando o Background como GameObject
-    GameObject* bgObj = new GameObject();
-    bgObj->AddComponent(new SpriteRenderer(*bgObj, "resources/img/Background.png"));
-    AddObject(bgObj);
+    // mapa adicionado primeiro (fundo)
+    GameObject* mapObj = new GameObject();
+    mapObj->box.x = 0;
+    mapObj->box.y = 0;
+    TileSet* tileSet = new TileSet(64, 64, "resources/img/Tileset.png");
+    mapObj->AddComponent(new TileMap(*mapObj, "resources/map/map.txt", tileSet));
+    AddObject(mapObj);
 
-    // 2. Adicionando o Zombie como GameObject
+    // zumbi adicionado em seguida (frente)
     GameObject* zombieObj = new GameObject();
     zombieObj->box.x = 600;
     zombieObj->box.y = 450;
@@ -24,7 +27,7 @@ State::State() : m_quitRequested(false) {
 
 State::~State() {
     m_music.Stop(0);
-    objectArray.clear(); // Limpa unique_ptrs
+    objectArray.clear(); // limpa unique_ptrs
 }
 
 void State::LoadAssets() {
@@ -40,16 +43,16 @@ void State::Update(float dt) {
         m_quitRequested = true;
     }
 
-    // 1. Atualiza todos
+    // atualiza todos
     for (size_t i = 0; i < objectArray.size(); i++) {
         objectArray[i]->Update(dt);
     }
 
-    // 2. Remove os mortos (usando indices conforme especificado)
+    // remove os mortos
     for (size_t i = 0; i < objectArray.size(); i++) {
         if (objectArray[i]->IsDead()) {
             objectArray.erase(objectArray.begin() + i);
-            i--; // Compensa a remocao do elemento no array
+            i--; // comepensa a remocao do elemento no array
         }
     }
 }
