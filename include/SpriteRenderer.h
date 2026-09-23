@@ -13,6 +13,7 @@ public:
     void Open(const std::string& file);
     void SetFrameCount(int frameCountW, int frameCountH);
     void SetFrame(int frame);
+    void SetCameraFollower(bool enabled);
 
     void Update(float dt) override;
     void Render() override;

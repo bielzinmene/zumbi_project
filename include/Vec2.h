@@ -20,4 +20,4 @@ public:
     void Rotate(float angleRad);
 };
 
-#endif // VEC2_H
+#endif // vEC2_H

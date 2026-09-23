@@ -23,4 +23,4 @@ private:
     bool m_quitRequested;
 };
 
-#endif // STATE_H
+#endif // sTATE_H

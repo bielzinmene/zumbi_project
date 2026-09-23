@@ -36,4 +36,4 @@ public:
     }
 };
 
-#endif // GAMEOBJECT_H
+#endif // gAMEOBJECT_H

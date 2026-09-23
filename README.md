@@ -1,28 +1,28 @@
-<h1 align="center"> Jogo Do Zumbi </h1>
+# Jogo do Zumbi
 
-Finalizada a etapa 2!
-### 🚀 O que foi implementado até agora
+Jogo 2D em C++11 com SDL2, desenvolvido na disciplina de Introdução ao Desenvolvimento de Jogos.
 
-**Etapa 1:**
-* **Base do Jogo:** Criação da estrutura principal, garantindo que ele rode de forma contínua e segura através do Game Loop e do padrão Singleton.
-* **Visual e Som:** Suporte inicial para desenhar imagens de fundo na tela (`Sprite`) e tocar uma trilha sonora em repetição (`Music`).
-* **Desempenho:** Gerenciamento da janela do jogo e limpeza correta da memória ao fechar o programa.
+**Etapa atual: trabalho 4**, com input, temporização, câmera e parallax.
 
-**Etapa 2:**
-* **Novo Sistema de Componentes:** O jogo agora usa uma estrutura modular inteligente (`GameObject` e `Component`). Em vez de lógicas super complexas, cada elemento do jogo ganha comportamentos adicionando pequenos "blocos" independentes.
-* **Matemática e Movimento:** Foram criadas ferramentas geométricas (`Vec2` e `Rect`) para facilitar cálculos de distância, colisão e rotação na tela.
-* **Animações:** O fundo estático deu lugar ao movimento! O sistema visual agora consegue recortar e exibir sequências de imagens para criar animações fluídas.
-* **O Primeiro Inimigo (Zumbi):** Criamos nosso primeiro "ator" autônomo na tela. O Zumbi possui sua própria energia (HP) e muda automaticamente a animação de "correndo" para "morto" quando a vida chega a zero.
+## Compilar e executar
 
----
+Requer Make, compilador C++ e as bibliotecas de desenvolvimento SDL2, SDL2_image, SDL2_mixer e SDL2_ttf.
 
-### 🎮 Como compilar e executar no Linux
+Na raiz do projeto:
 
-Certifique-se de ter os pacotes de desenvolvimento da SDL2 instalados no seu sistema.
+```bash
+make
+./JOGO
+```
 
-- `1º passo` - Para compilar e preparar o jogo, execute o seguinte comando no terminal na raiz do projeto:
-  ```bash
-  make
-- `2º passo` - Para rodar o jogo após compilado, execute o comando abaixo no terminal:
-  ```bash
-  ./JOGO
+## Controles
+
+| Tecla | Ação |
+| --- | --- |
+| Setas ou WASD | Mover a câmera |
+| Espaço | Criar um zumbi na posição do mouse |
+| Clique esquerdo | Causar dano ao zumbi |
+| Esc | Sair |
+
+Cada zumbi tem 100 HP e recebe 10 de dano por clique. Após morrer, desaparece em 5 segundos.
+O parallax pode ser observado nas estrelas visíveis através do lago ao mover a câmera.
