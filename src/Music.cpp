@@ -1,5 +1,6 @@
 #include "../include/Music.h"
 #include <iostream>
+#include "Resources.h"
 
 Music::Music() : m_music(nullptr) {}
 
@@ -9,23 +10,11 @@ Music::Music(const std::string& file) : Music() {
 
 Music::~Music() {
     Stop(0);
-    if (m_music != nullptr) {
-        Mix_FreeMusic(m_music);
-        m_music = nullptr;
-    }
+    m_music = nullptr;
 }
 
 void Music::Open(const std::string& file) {
-    if (m_music != nullptr) {
-        Mix_FreeMusic(m_music);
-        m_music = nullptr;
-    }
-
-    m_music = Mix_LoadMUS(file.c_str());
-    if (m_music == nullptr) {
-        std::cerr << "[Music] Falha ao carregar trilha sonora: " << file
-                  << " | Erro Mix: " << Mix_GetError() << std::endl;
-    }
+    m_music = Resources::GetMusic(file);
 }
 
 void Music::Play(int times) {

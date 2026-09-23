@@ -9,7 +9,7 @@ Animator::Animator(GameObject& associated)
 void Animator::Update(float dt) {
     if (m_frameTime == 0.0f) return;
 
-    // Usando 1.0f temporariamente por frame como sugerido ate calcularmos o dt real no futuro[cite: 1]
+    // Usando 1.0f temporariamente por frame como sugerido ate calcularmos o dt real no futuro
     m_timeElapsed += 1.0f;
 
     if (m_timeElapsed > m_frameTime) {
@@ -27,7 +27,7 @@ void Animator::Update(float dt) {
     }
 }
 
-void Animator::Render() { /* Vazio[cite: 1] */ }
+void Animator::Render() { /* Vazio */ }
 
 void Animator::AddAnimation(const std::string& name, const Animation& anim) {
     if (m_animations.find(name) == m_animations.end()) {

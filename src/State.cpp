@@ -2,29 +2,55 @@
 #include "SpriteRenderer.h"
 #include "Zombie.h"
 #include "SDL_include.h"
-
-// Note que SpriteRenderer vai requerer o include dele aqui em breve para o BG
+#include "TileSet.h"
+#include "TileMap.h"
 
 State::State() : m_quitRequested(false) {
-    LoadAssets(); // (Carrega a música aqui dentro como antes)
+    LoadAssets();
     m_music.Play(-1);
 
-    // 1. Adicionando o Background como GameObject
-    GameObject* bgObj = new GameObject();
-    bgObj->AddComponent(new SpriteRenderer(*bgObj, "resources/img/Background.png"));
-    AddObject(bgObj);
+    // 1. Mapa de fundo
+    GameObject* mapObj = new GameObject();
+    mapObj->box.x = 0;
+    mapObj->box.y = 0;
+    TileSet* tileSet = new TileSet(64, 64, "resources/img/Tileset.png");
+    mapObj->AddComponent(new TileMap(*mapObj, "resources/map/map.txt", tileSet));
+    AddObject(mapObj);
 
-    // 2. Adicionando o Zombie como GameObject
-    GameObject* zombieObj = new GameObject();
-    zombieObj->box.x = 600;
-    zombieObj->box.y = 450;
-    zombieObj->AddComponent(new Zombie(*zombieObj));
-    AddObject(zombieObj);
+    // 2. Novos posicionamentos dos zumbis pelo cenário visível
+
+    // Zumbi 1 - Campo aberto superior esquerdo
+    GameObject* zombie1 = new GameObject();
+    zombie1->box.x = 220;
+    zombie1->box.y = 180;
+    zombie1->AddComponent(new Zombie(*zombie1));
+    AddObject(zombie1);
+
+    // Zumbi 2 - Campo aberto superior central
+    GameObject* zombie2 = new GameObject();
+    zombie2->box.x = 680;
+    zombie2->box.y = 220;
+    zombie2->AddComponent(new Zombie(*zombie2));
+    AddObject(zombie2);
+
+    // Zumbi 3 - Lado de fora, à esquerda da cerca
+    GameObject* zombie3 = new GameObject();
+    zombie3->box.x = 380;
+    zombie3->box.y = 620;
+    zombie3->AddComponent(new Zombie(*zombie3));
+    AddObject(zombie3);
+
+    // Zumbi 4 - Dentro da arena de cerca, próximo ao gramado com flores
+    GameObject* zombie4 = new GameObject();
+    zombie4->box.x = 750;
+    zombie4->box.y = 520;
+    zombie4->AddComponent(new Zombie(*zombie4));
+    AddObject(zombie4);
 }
 
 State::~State() {
     m_music.Stop(0);
-    objectArray.clear(); // Limpa unique_ptrs
+    objectArray.clear();
 }
 
 void State::LoadAssets() {
@@ -40,16 +66,14 @@ void State::Update(float dt) {
         m_quitRequested = true;
     }
 
-    // 1. Atualiza todos
     for (size_t i = 0; i < objectArray.size(); i++) {
         objectArray[i]->Update(dt);
     }
 
-    // 2. Remove os mortos (usando indices conforme especificado)
     for (size_t i = 0; i < objectArray.size(); i++) {
         if (objectArray[i]->IsDead()) {
             objectArray.erase(objectArray.begin() + i);
-            i--; // Compensa a remocao do elemento no array
+            i--;
         }
     }
 }

@@ -8,7 +8,7 @@ SpriteRenderer::SpriteRenderer(GameObject& associated, const std::string& file, 
 
     associated.box.w = m_sprite.GetWidth();
     associated.box.h = m_sprite.GetHeight();
-    m_sprite.SetFrame(0); // Inicia no frame 0[cite: 1]
+    m_sprite.SetFrame(0); // Inicia no frame 0
 }
 
 void SpriteRenderer::Open(const std::string& file) {
@@ -25,7 +25,7 @@ void SpriteRenderer::SetFrame(int frame) {
     m_sprite.SetFrame(frame);
 }
 
-void SpriteRenderer::Update(float dt) { (void)dt; /* Vazio por enquanto[cite: 1] */ }
+void SpriteRenderer::Update(float dt) { (void)dt; /* Vazio por enquanto */ }
 
 void SpriteRenderer::Render() {
     m_sprite.Render(associated.box.x, associated.box.y);
