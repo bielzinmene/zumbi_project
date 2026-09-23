@@ -1,54 +1,34 @@
 #include "State.h"
 #include "SpriteRenderer.h"
 #include "Zombie.h"
-#include "SDL_include.h"
 #include "TileSet.h"
 #include "TileMap.h"
+#include "InputManager.h"
+#include "Camera.h"
 
 State::State() : m_quitRequested(false) {
+    Camera::Unfollow();
+    Camera::pos = Vec2();
     LoadAssets();
     m_music.Play(-1);
 
-    // 1. Mapa de fundo
-    GameObject* mapObj = new GameObject();
-    mapObj->box.x = 0;
-    mapObj->box.y = 0;
-    TileSet* tileSet = new TileSet(64, 64, "resources/img/Tileset.png");
-    mapObj->AddComponent(new TileMap(*mapObj, "resources/map/map.txt", tileSet));
-    AddObject(mapObj);
+    auto* background = new GameObject();
+    auto* sprite = new SpriteRenderer(*background, "resources/img/Background.png");
+    sprite->SetCameraFollower(true);
+    background->AddComponent(sprite);
+    AddObject(background);
 
-    // 2. Novos posicionamentos dos zumbis pelo cenário visível
-
-    // Zumbi 1 - Campo aberto superior esquerdo
-    GameObject* zombie1 = new GameObject();
-    zombie1->box.x = 220;
-    zombie1->box.y = 180;
-    zombie1->AddComponent(new Zombie(*zombie1));
-    AddObject(zombie1);
-
-    // Zumbi 2 - Campo aberto superior central
-    GameObject* zombie2 = new GameObject();
-    zombie2->box.x = 680;
-    zombie2->box.y = 220;
-    zombie2->AddComponent(new Zombie(*zombie2));
-    AddObject(zombie2);
-
-    // Zumbi 3 - Lado de fora, à esquerda da cerca
-    GameObject* zombie3 = new GameObject();
-    zombie3->box.x = 380;
-    zombie3->box.y = 620;
-    zombie3->AddComponent(new Zombie(*zombie3));
-    AddObject(zombie3);
-
-    // Zumbi 4 - Dentro da arena de cerca, próximo ao gramado com flores
-    GameObject* zombie4 = new GameObject();
-    zombie4->box.x = 750;
-    zombie4->box.y = 520;
-    zombie4->AddComponent(new Zombie(*zombie4));
-    AddObject(zombie4);
+    auto* mapObject = new GameObject();
+    auto* tiles = new TileSet(64, 64, "resources/img/Tileset.png");
+    auto* map = new TileMap(*mapObject, "resources/map/map.txt", tiles);
+    // o fundo acompanha 80% do deslocamento; a camada superior acompanha 100%.
+    map->SetParallax(0, 0.8f);
+    mapObject->AddComponent(map);
+    AddObject(mapObject);
 }
 
 State::~State() {
+    Camera::Unfollow();
     m_music.Stop(0);
     objectArray.clear();
 }
@@ -62,28 +42,37 @@ void State::AddObject(GameObject* go) {
 }
 
 void State::Update(float dt) {
-    if (SDL_QuitRequested()) {
+    const auto& input = InputManager::GetInstance();
+    if (input.QuitRequested() || input.KeyPress(ESCAPE_KEY)) {
         m_quitRequested = true;
+        return;
     }
-
-    for (size_t i = 0; i < objectArray.size(); i++) {
+    Camera::Update(dt);
+    if (input.KeyPress(SPACE_KEY)) {
+        auto* zombie = new GameObject();
+        zombie->AddComponent(new Zombie(*zombie));
+        zombie->box.x = input.GetMouseX() + Camera::pos.x;
+        zombie->box.y = input.GetMouseY() + Camera::pos.y;
+        AddObject(zombie);
+    }
+    for (size_t i = 0; i < objectArray.size(); ++i) {
         objectArray[i]->Update(dt);
     }
-
-    for (size_t i = 0; i < objectArray.size(); i++) {
+    for (size_t i = 0; i < objectArray.size();) {
         if (objectArray[i]->IsDead()) {
+            if (Camera::GetFocus() == objectArray[i].get()) Camera::Unfollow();
             objectArray.erase(objectArray.begin() + i);
-            i--;
+        } else {
+            ++i;
         }
     }
 }
 
 void State::Render() {
-    for (auto& obj : objectArray) {
-        obj->Render();
+    // desenha o fundo fixo, as duas camadas do mapa e depois os zumbis.
+    for (auto& object : objectArray) {
+        object->Render();
     }
 }
 
-bool State::QuitRequested() const {
-    return m_quitRequested;
-}
+bool State::QuitRequested() const { return m_quitRequested; }

@@ -2,9 +2,11 @@
 #include "Game.h"
 #include <iostream>
 #include "Resources.h"
+#include "Camera.h"
+#include <cmath>
 
 Sprite::Sprite()
-    : m_texture(nullptr), m_width(0), m_height(0), m_clipRect{0, 0, 0, 0}, m_frameCountW(1), m_frameCountH(1) {}
+    : cameraFollower(false), m_texture(nullptr), m_width(0), m_height(0), m_clipRect{0, 0, 0, 0}, m_frameCountW(1), m_frameCountH(1) {}
 
 Sprite::Sprite(const std::string& file, int frameCountW, int frameCountH)
     : Sprite() {
@@ -40,14 +42,15 @@ void Sprite::SetClip(int x, int y, int w, int h) {
     m_clipRect.h = h;
 }
 
-void Sprite::Render(int x, int y) {
+void Sprite::Render(float x, float y, float parallax) {
     if (m_texture == nullptr) {
         return;
     }
 
     SDL_Rect dstRect;
-    dstRect.x = x;
-    dstRect.y = y;
+    const float factor = cameraFollower ? 0.0f : parallax;
+    dstRect.x = static_cast<int>(std::round(x - Camera::pos.x * factor));
+    dstRect.y = static_cast<int>(std::round(y - Camera::pos.y * factor));
     dstRect.w = m_clipRect.w;
     dstRect.h = m_clipRect.h;
 

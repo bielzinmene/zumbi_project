@@ -20,10 +20,10 @@ TileSet::TileSet(int tileWidth, int tileHeight, const std::string& file)
     m_tileSet.SetFrameCount(columns, rows);
 }
 
-void TileSet::RenderTile(unsigned index, float x, float y) {
+void TileSet::RenderTile(unsigned index, float x, float y, float parallax) {
     if (index < (unsigned)m_tileCount) {
         m_tileSet.SetFrame((int)index);
-        m_tileSet.Render((int)x, (int)y);
+        m_tileSet.Render(x, y, parallax);
     } else {
         std::cerr << "[TileSet] Erro: indice invalido (" << index << ")" << std::endl;
     }

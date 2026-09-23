@@ -9,10 +9,10 @@ Animator::Animator(GameObject& associated)
 void Animator::Update(float dt) {
     if (m_frameTime == 0.0f) return;
 
-    // Usando 1.0f temporariamente por frame como sugerido ate calcularmos o dt real no futuro
-    m_timeElapsed += 1.0f;
+    m_timeElapsed += dt;
 
-    if (m_timeElapsed > m_frameTime) {
+    // recupera todos os frames transcorridos mesmo quando um frame demora mais.
+    while (m_timeElapsed >= m_frameTime) {
         m_currentFrame++;
         m_timeElapsed -= m_frameTime;
 
@@ -27,7 +27,7 @@ void Animator::Update(float dt) {
     }
 }
 
-void Animator::Render() { /* Vazio */ }
+void Animator::Render() {}
 
 void Animator::AddAnimation(const std::string& name, const Animation& anim) {
     if (m_animations.find(name) == m_animations.end()) {

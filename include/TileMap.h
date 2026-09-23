@@ -17,6 +17,7 @@ public:
     int& At(int x, int y, int z = 0);
 
     void RenderLayer(int layer);
+    void SetParallax(int layer, float factor);
     void Render() override;
     void Update(float dt) override;
     int GetWidth() const;
@@ -25,6 +26,7 @@ public:
 
 private:
     std::vector<int> m_tileMatrix;
+    std::vector<float> m_parallax;
     std::unique_ptr<TileSet> m_tileSet;
     int m_mapWidth;
     int m_mapHeight;

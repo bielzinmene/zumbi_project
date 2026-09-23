@@ -1,11 +1,12 @@
 #include "../include/Game.h"
 #include <iostream>
 #include "Resources.h"
+#include "InputManager.h"
 
 Game* Game::s_instance = nullptr;
 
 Game::Game(const std::string& title, int width, int height)
-    : m_window(nullptr), m_renderer(nullptr), m_state(nullptr) {
+    : m_window(nullptr), m_renderer(nullptr), m_state(nullptr), m_frameStart(0), m_dt(0.0f) {
 
     if (s_instance != nullptr) {
         std::cerr << "[Game] Erro fatal: Singleton de Game violado!" << std::endl;
@@ -69,6 +70,8 @@ Game::~Game() {
         m_state = nullptr;
     }
 
+    Resources::ClearAll();
+
     if (m_renderer != nullptr) {
         SDL_DestroyRenderer(m_renderer);
         m_renderer = nullptr;
@@ -83,11 +86,12 @@ Game::~Game() {
     Mix_Quit();
     IMG_Quit();
     SDL_Quit();
+    s_instance = nullptr;
 }
 
 Game& Game::GetInstance() {
     if (s_instance == nullptr) {
-        new Game("Gabriel Menezes - 241020803", 1200, 850);
+        new Game("Gabriel Menezes - 241020803", 1200, 900);
     }
     return *s_instance;
 }
@@ -101,8 +105,11 @@ State& Game::GetState() const {
 }
 
 void Game::Run() {
+    m_frameStart = SDL_GetTicks();
     while (!m_state->QuitRequested()) {
-        m_state->Update(0.0f);
+        CalculateDeltaTime();
+        InputManager::GetInstance().Update();
+        m_state->Update(m_dt);
 
         SDL_RenderClear(m_renderer);
         m_state->Render();
@@ -111,6 +118,12 @@ void Game::Run() {
         SDL_Delay(33);
     }
 
-    // libera todas as texturas e audios cacheados na saida do loop
-    Resources::ClearAll();
 }
+
+void Game::CalculateDeltaTime() {
+    const Uint32 now = SDL_GetTicks();
+    m_dt = (now - m_frameStart) / 1000.0f;
+    m_frameStart = now;
+}
+
+float Game::GetDeltaTime() const { return m_dt; }

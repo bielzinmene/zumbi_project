@@ -24,6 +24,7 @@ void TileMap::Load(const std::string& file) {
         }
 
         m_tileMatrix.resize(m_mapWidth * m_mapHeight * m_mapDepth);
+        m_parallax.assign(m_mapDepth, 1.0f);
 
         // preenche a matriz diretamente na ordem z, y, x
         for (int z = 0; z < m_mapDepth; ++z) {
@@ -64,7 +65,7 @@ void TileMap::Render() {
 }
 
 void TileMap::RenderLayer(int layer) {
-    if (!m_tileSet) return;
+    if (!m_tileSet || layer < 0 || layer >= m_mapDepth) return;
 
     int tileW = m_tileSet->GetTileWidth();
     int tileH = m_tileSet->GetTileHeight();
@@ -78,7 +79,8 @@ void TileMap::RenderLayer(int layer) {
                 m_tileSet->RenderTile(
                     (unsigned)index,
                     associated.box.x + (float)(x * tileW),
-                    associated.box.y + (float)(y * tileH)
+                    associated.box.y + (float)(y * tileH),
+                    m_parallax[layer]
                 );
             }
         }
@@ -99,4 +101,10 @@ int TileMap::GetHeight() const {
 
 int TileMap::GetDepth() const {
     return m_mapDepth;
+}
+
+void TileMap::SetParallax(int layer, float factor) {
+    if (layer >= 0 && layer < m_mapDepth && factor >= 0.0f) {
+        m_parallax[layer] = factor;
+    }
 }

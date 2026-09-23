@@ -4,7 +4,7 @@
 GameObject::GameObject() : isDead(false) {}
 
 GameObject::~GameObject() {
-    // Percorre do fim para o inicio para evitar falhas de iterador
+    // percorre do fim para o inicio para evitar falhas de iterador
     for (int i = components.size() - 1; i >= 0; --i) {
         delete components[i];
     }

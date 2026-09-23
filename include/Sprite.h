@@ -15,13 +15,14 @@ public:
 
     void Open(const std::string& file);
     void SetClip(int x, int y, int w, int h);
-    void Render(int x, int y);
+    void Render(float x, float y, float parallax = 1.0f);
+    bool cameraFollower;
 
     int GetWidth() const;
     int GetHeight() const;
     bool IsOpen() const;
 
-    // Novas funcoes de animacao
+    // novas funcoes de animacao
     void SetFrame(int frame);
     void SetFrameCount(int frameCountW, int frameCountH);
 
@@ -31,7 +32,7 @@ private:
     int m_height;
     SDL_Rect m_clipRect;
 
-    // Controle de matriz de frames
+    // controle de matriz de frames
     int m_frameCountW;
     int m_frameCountH;
 };

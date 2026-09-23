@@ -1,7 +1,7 @@
 #ifndef COMPONENT_H
 #define COMPONENT_H
 
-class GameObject; // Forward declaration
+class GameObject; // forward declaration
 
 class Component {
 protected:
@@ -15,4 +15,4 @@ public:
     virtual void Render() = 0;
 };
 
-#endif // COMPONENT_H
+#endif // cOMPONENT_H

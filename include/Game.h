@@ -19,6 +19,7 @@ public:
     State& GetState() const;
 
     void Run(); //inicialiador
+    float GetDeltaTime() const;
 
 private:
     Game(const std::string& title, int width, int height);//constructor
@@ -27,6 +28,9 @@ private:
     SDL_Window* m_window;
     SDL_Renderer* m_renderer;
     State* m_state;
+    Uint32 m_frameStart;
+    float m_dt;
+    void CalculateDeltaTime();
     
 };
 
