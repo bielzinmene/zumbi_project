@@ -6,10 +6,10 @@
 #include "TileMap.h"
 
 State::State() : m_quitRequested(false) {
-    LoadAssets(); //carega musica
+    LoadAssets();
     m_music.Play(-1);
 
-    // mapa adicionado primeiro (fundo)
+    // 1. Mapa de fundo
     GameObject* mapObj = new GameObject();
     mapObj->box.x = 0;
     mapObj->box.y = 0;
@@ -17,17 +17,40 @@ State::State() : m_quitRequested(false) {
     mapObj->AddComponent(new TileMap(*mapObj, "resources/map/map.txt", tileSet));
     AddObject(mapObj);
 
-    // zumbi adicionado em seguida (frente)
-    GameObject* zombieObj = new GameObject();
-    zombieObj->box.x = 600;
-    zombieObj->box.y = 450;
-    zombieObj->AddComponent(new Zombie(*zombieObj));
-    AddObject(zombieObj);
+    // 2. Novos posicionamentos dos zumbis pelo cenário visível
+
+    // Zumbi 1 - Campo aberto superior esquerdo
+    GameObject* zombie1 = new GameObject();
+    zombie1->box.x = 220;
+    zombie1->box.y = 180;
+    zombie1->AddComponent(new Zombie(*zombie1));
+    AddObject(zombie1);
+
+    // Zumbi 2 - Campo aberto superior central
+    GameObject* zombie2 = new GameObject();
+    zombie2->box.x = 680;
+    zombie2->box.y = 220;
+    zombie2->AddComponent(new Zombie(*zombie2));
+    AddObject(zombie2);
+
+    // Zumbi 3 - Lado de fora, à esquerda da cerca
+    GameObject* zombie3 = new GameObject();
+    zombie3->box.x = 380;
+    zombie3->box.y = 620;
+    zombie3->AddComponent(new Zombie(*zombie3));
+    AddObject(zombie3);
+
+    // Zumbi 4 - Dentro da arena de cerca, próximo ao gramado com flores
+    GameObject* zombie4 = new GameObject();
+    zombie4->box.x = 750;
+    zombie4->box.y = 520;
+    zombie4->AddComponent(new Zombie(*zombie4));
+    AddObject(zombie4);
 }
 
 State::~State() {
     m_music.Stop(0);
-    objectArray.clear(); // limpa unique_ptrs
+    objectArray.clear();
 }
 
 void State::LoadAssets() {
@@ -43,16 +66,14 @@ void State::Update(float dt) {
         m_quitRequested = true;
     }
 
-    // atualiza todos
     for (size_t i = 0; i < objectArray.size(); i++) {
         objectArray[i]->Update(dt);
     }
 
-    // remove os mortos
     for (size_t i = 0; i < objectArray.size(); i++) {
         if (objectArray[i]->IsDead()) {
             objectArray.erase(objectArray.begin() + i);
-            i--; // comepensa a remocao do elemento no array
+            i--;
         }
     }
 }

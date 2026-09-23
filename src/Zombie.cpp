@@ -3,33 +3,38 @@
 #include "Animator.h"
 #include "GameObject.h"
 
-Zombie::Zombie(GameObject& associated) : Component(associated), m_hitpoints(100) {
-    // 1. Cria a renderizacao em malha de 3 colunas e 2 linhas (3x2)[cite: 1]
+Zombie::Zombie(GameObject& associated) : Component(associated), m_hitpoints(100), m_deathSound("resources/audio/Dead.wav") {
+    // 1. Cria a renderizacao em malha de 3 colunas e 2 linhas (3x2)
     SpriteRenderer* renderer = new SpriteRenderer(associated, "resources/img/Enemy.png", 3, 2);
     associated.AddComponent(renderer);
 
-    // 2. Cria o animador e adiciona os comportamentos de frame[cite: 1]
+    // 2. Cria o animador e adiciona os comportamentos de frame
     Animator* animator = new Animator(associated);
     animator->AddAnimation("walking", Animation(0, 3, 10.0f));
     animator->AddAnimation("dead", Animation(5, 5, 0.0f));
-    animator->SetAnimation("walking"); // Inicia correndo[cite: 1]
+    animator->SetAnimation("walking"); // Inicia correndo
 
     associated.AddComponent(animator);
 }
 
 void Zombie::Damage(int damage) {
-    m_hitpoints -= damage;
-    if (m_hitpoints <= 0) {
-        Animator* anim = associated.GetComponent<Animator>();
-        if (anim != nullptr) {
-            anim->SetAnimation("dead");
+    if (m_hitpoints > 0) {
+        m_hitpoints -= damage;
+        if (m_hitpoints <= 0) {
+            m_deathSound.Play(1); // Toca o som de morte
+
+            // Troca imediatamente para a animacao de lapide (frame 5)
+            auto* anim = associated.GetComponent<Animator>();
+            if (anim != nullptr) {
+                anim->SetAnimation("dead");
+            }
         }
     }
 }
 
 void Zombie::Update(float dt) {
     (void)dt;
-    Damage(1); // Perde vida a cada frame temporariamente[cite: 1]
+    Damage(1); // Perde vida a cada frame temporariamente
 }
 
-void Zombie::Render() { /* Vazio[cite: 1] */ }
+void Zombie::Render() { /* Vazio */ }

@@ -1,5 +1,6 @@
 #include "../include/Game.h"
 #include <iostream>
+#include "Resources.h"
 
 Game* Game::s_instance = nullptr;
 
@@ -100,21 +101,16 @@ State& Game::GetState() const {
 }
 
 void Game::Run() {
-    //roda enquanto QuitRequested() for falso
     while (!m_state->QuitRequested()) {
-        // atualiza o estado do SO
         m_state->Update(0.0f);
 
-        // limpa renderer
         SDL_RenderClear(m_renderer);
-
-        // renderiza os spirts
         m_state->Render();
-
-        // exibe o frame na tela
         SDL_RenderPresent(m_renderer);
 
-        //controla a taxa de quadros
         SDL_Delay(33);
     }
+
+    // libera todas as texturas e audios cacheados na saida do loop
+    Resources::ClearAll();
 }
