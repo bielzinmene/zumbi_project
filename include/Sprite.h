@@ -2,6 +2,7 @@
 #define SPRITE_H
 
 #include <string>
+#include "Vec2.h"
 
 #define INCLUDE_SDL
 #define INCLUDE_SDL_IMAGE
@@ -15,7 +16,10 @@ public:
 
     void Open(const std::string& file);
     void SetClip(int x, int y, int w, int h);
-    void Render(float x, float y, float parallax = 1.0f);
+    void Render(float x, float y, float parallax = 1.0f, double angle = 0.0);
+    void SetScale(float scaleX, float scaleY);
+    Vec2 GetScale() const;
+    void SetFlip(SDL_RendererFlip flip);
     bool cameraFollower;
 
     int GetWidth() const;
@@ -35,6 +39,8 @@ private:
     // controle de matriz de frames
     int m_frameCountW;
     int m_frameCountH;
+    Vec2 m_scale;
+    SDL_RendererFlip m_flip;
 };
 
 #endif

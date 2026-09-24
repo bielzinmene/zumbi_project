@@ -23,6 +23,8 @@ private:
     float m_frameTime;
     int m_currentFrame;
     float m_timeElapsed;
+    std::string m_current;
+    SDL_RendererFlip m_flip;
 };
 
 #endif

@@ -10,7 +10,7 @@ Sound::Sound(const std::string& file) : Sound() {
 
 Sound::~Sound() {
     Stop();
-    // a desalocacao da memoria e centralizada na classe Resources
+    // a desalocacao da memoria e centralizada na classe resources
 }
 
 void Sound::Open(const std::string& file) {

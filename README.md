@@ -2,7 +2,8 @@
 
 Jogo 2D em C++11 com SDL2, desenvolvido na disciplina de Introdução ao Desenvolvimento de Jogos.
 
-**Etapa atual: trabalho 4**, com input, temporização, câmera e parallax.
+**Etapa atual: trabalho 5**, com personagem jogável, arma, projéteis, rotação,
+espelhamento e escala. Inclui parallax e o extra de ordenação por profundidade (Z/Y sorting).
 
 ## Compilar e executar
 
@@ -19,10 +20,14 @@ make
 
 | Tecla | Ação |
 | --- | --- |
-| Setas ou WASD | Mover a câmera |
+| WASD | Mover o personagem |
 | Espaço | Criar um zumbi na posição do mouse |
-| Clique esquerdo | Causar dano ao zumbi |
+| Clique esquerdo | Atirar na direção do mouse |
 | Esc | Sair |
 
-Cada zumbi tem 100 HP e recebe 10 de dano por clique. Após morrer, desaparece em 5 segundos.
-O parallax pode ser observado nas estrelas visíveis através do lago ao mover a câmera.
+A câmera acompanha o personagem. A arma recarrega automaticamente entre disparos,
+e os projéteis desaparecem ao atingir seu alcance máximo. As colisões dos tiros
+entram na etapa 6; o dano por clique direto nos zumbis da etapa 4 foi mantido.
+
+O Z/Y sorting faz o personagem passar à frente ou atrás dos zumbis conforme sua
+posição no cenário. O parallax pode ser observado nas estrelas através do lago.

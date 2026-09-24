@@ -13,14 +13,18 @@ public:
 
     bool QuitRequested() const;
     void LoadAssets();
+    void Start();
     void Update(float dt);
     void Render();
-    void AddObject(GameObject* go);
+    std::weak_ptr<GameObject> AddObject(GameObject* go);
+    std::weak_ptr<GameObject> GetObjectPtr(GameObject* go) const;
 
 private:
-    std::vector<std::unique_ptr<GameObject>> objectArray;
+    std::vector<std::shared_ptr<GameObject>> objectArray;
     Music m_music;
     bool m_quitRequested;
+    bool m_started;
+    bool m_assetsLoaded;
 };
 
-#endif // sTATE_H
+#endif // state_h

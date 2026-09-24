@@ -6,12 +6,12 @@
 #include <cmath>
 
 Sprite::Sprite()
-    : cameraFollower(false), m_texture(nullptr), m_width(0), m_height(0), m_clipRect{0, 0, 0, 0}, m_frameCountW(1), m_frameCountH(1) {}
+    : cameraFollower(false), m_texture(nullptr), m_width(0), m_height(0), m_clipRect{0, 0, 0, 0}, m_frameCountW(1), m_frameCountH(1), m_scale(1.0f, 1.0f), m_flip(SDL_FLIP_NONE) {}
 
 Sprite::Sprite(const std::string& file, int frameCountW, int frameCountH)
     : Sprite() {
-    m_frameCountW = frameCountW;
-    m_frameCountH = frameCountH;
+    m_frameCountW = frameCountW > 0 ? frameCountW : 1;
+    m_frameCountH = frameCountH > 0 ? frameCountH : 1;
     Open(file);
 }
 
@@ -32,7 +32,7 @@ void Sprite::Open(const std::string& file) {
         return;
     }
 
-    SetClip(0, 0, m_width, m_height);
+    SetFrame(0);
 }
 
 void Sprite::SetClip(int x, int y, int w, int h) {
@@ -42,7 +42,7 @@ void Sprite::SetClip(int x, int y, int w, int h) {
     m_clipRect.h = h;
 }
 
-void Sprite::Render(float x, float y, float parallax) {
+void Sprite::Render(float x, float y, float parallax, double angle) {
     if (m_texture == nullptr) {
         return;
     }
@@ -51,19 +51,19 @@ void Sprite::Render(float x, float y, float parallax) {
     const float factor = cameraFollower ? 0.0f : parallax;
     dstRect.x = static_cast<int>(std::round(x - Camera::pos.x * factor));
     dstRect.y = static_cast<int>(std::round(y - Camera::pos.y * factor));
-    dstRect.w = m_clipRect.w;
-    dstRect.h = m_clipRect.h;
+    dstRect.w = static_cast<int>(std::round(m_clipRect.w * m_scale.x));
+    dstRect.h = static_cast<int>(std::round(m_clipRect.h * m_scale.y));
 
     SDL_Renderer* renderer = Game::GetInstance().GetRenderer();
-    SDL_RenderCopy(renderer, m_texture, &m_clipRect, &dstRect);
+    SDL_RenderCopyEx(renderer, m_texture, &m_clipRect, &dstRect, angle, nullptr, m_flip);
 }
 
 int Sprite::GetWidth() const {
-    return m_width / m_frameCountW;
+    return static_cast<int>(std::round((m_width / m_frameCountW) * m_scale.x));
 }
 
 int Sprite::GetHeight() const {
-    return m_height / m_frameCountH;
+    return static_cast<int>(std::round((m_height / m_frameCountH) * m_scale.y));
 }
 
 bool Sprite::IsOpen() const {
@@ -71,16 +71,24 @@ bool Sprite::IsOpen() const {
 }
 
 void Sprite::SetFrameCount(int frameCountW, int frameCountH) {
-    m_frameCountW = frameCountW;
-    m_frameCountH = frameCountH;
+    m_frameCountW = frameCountW > 0 ? frameCountW : 1;
+    m_frameCountH = frameCountH > 0 ? frameCountH : 1;
 }
 
 void Sprite::SetFrame(int frame) {
-    int frameW = GetWidth();
-    int frameH = GetHeight();
+    if (frame < 0 || frame >= m_frameCountW * m_frameCountH) return;
+    const int frameW = m_width / m_frameCountW;
+    const int frameH = m_height / m_frameCountH;
 
     int currentX = (frame % m_frameCountW) * frameW;
     int currentY = (frame / m_frameCountW) * frameH;
 
     SetClip(currentX, currentY, frameW, frameH);
 }
+
+void Sprite::SetScale(float scaleX, float scaleY) {
+    if (scaleX > 0.0f) m_scale.x = scaleX;
+    if (scaleY > 0.0f) m_scale.y = scaleY;
+}
+Vec2 Sprite::GetScale() const { return m_scale; }
+void Sprite::SetFlip(SDL_RendererFlip flip) { m_flip = flip; }

@@ -16,4 +16,4 @@ public:
     bool Contains(const Vec2& point) const;
 };
 
-#endif // rECT_H
+#endif // rect_h
