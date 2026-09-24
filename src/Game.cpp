@@ -14,7 +14,7 @@ Game::Game(const std::string& title, int width, int height)
     }
     s_instance = this;
 
-    // inicializacao do SDL2
+    // inicializacao do sdl2
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_TIMER) != 0) {
         std::cerr << "[Game] Erro ao inicializar SDL: " << SDL_GetError() << std::endl;
         exit(EXIT_FAILURE);
@@ -105,6 +105,7 @@ State& Game::GetState() const {
 }
 
 void Game::Run() {
+    m_state->Start();
     m_frameStart = SDL_GetTicks();
     while (!m_state->QuitRequested()) {
         CalculateDeltaTime();

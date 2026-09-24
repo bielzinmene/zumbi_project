@@ -5,26 +5,13 @@
 #include "TileMap.h"
 #include "InputManager.h"
 #include "Camera.h"
+#include "Character.h"
+#include "PlayerController.h"
+#include <algorithm>
 
-State::State() : m_quitRequested(false) {
+State::State() : m_quitRequested(false), m_started(false), m_assetsLoaded(false) {
     Camera::Unfollow();
     Camera::pos = Vec2();
-    LoadAssets();
-    m_music.Play(-1);
-
-    auto* background = new GameObject();
-    auto* sprite = new SpriteRenderer(*background, "resources/img/Background.png");
-    sprite->SetCameraFollower(true);
-    background->AddComponent(sprite);
-    AddObject(background);
-
-    auto* mapObject = new GameObject();
-    auto* tiles = new TileSet(64, 64, "resources/img/Tileset.png");
-    auto* map = new TileMap(*mapObject, "resources/map/map.txt", tiles);
-    // o fundo acompanha 80% do deslocamento; a camada superior acompanha 100%.
-    map->SetParallax(0, 0.8f);
-    mapObject->AddComponent(map);
-    AddObject(mapObject);
 }
 
 State::~State() {
@@ -34,11 +21,66 @@ State::~State() {
 }
 
 void State::LoadAssets() {
+    if (m_assetsLoaded) return;
+    m_assetsLoaded = true;
+
+    auto* background = new GameObject();
+    background->renderLayer = -2;
+    auto* sprite = new SpriteRenderer(*background, "resources/img/Background.png");
+    sprite->SetCameraFollower(true);
+    background->AddComponent(sprite);
+    AddObject(background);
+
+    auto* mapObject = new GameObject();
+    mapObject->renderLayer = -1;
+    auto* tiles = new TileSet(64, 64, "resources/img/Tileset.png");
+    auto* map = new TileMap(*mapObject, "resources/map/map.txt", tiles);
+    map->SetParallax(0, 0.8f);
+    mapObject->AddComponent(map);
+    AddObject(mapObject);
+
+    auto* playerObject = new GameObject();
+    playerObject->box.x = 1280.0f;
+    playerObject->box.y = 1280.0f;
+    // os comandos chegam antes da atualizacao do personagem.
+    playerObject->AddComponent(new PlayerController(*playerObject));
+    auto* character = new Character(*playerObject, "resources/img/Player.png");
+    playerObject->AddComponent(character);
+    Character::player = character;
+    AddObject(playerObject);
+    Camera::Follow(playerObject);
+
     m_music.Open("resources/audio/BGM.wav");
+    m_music.Play(-1);
 }
 
-void State::AddObject(GameObject* go) {
-    objectArray.emplace_back(go);
+void State::Start() {
+    if (m_started) return;
+    LoadAssets();
+    m_started = true;
+    const size_t count = objectArray.size();
+    for (size_t i = 0; i < count; ++i) {
+        auto object = objectArray[i];
+        object->Start();
+    }
+    Camera::Update(0.0f);
+}
+
+std::weak_ptr<GameObject> State::AddObject(GameObject* go) {
+    if (!go) return {};
+    auto existing = GetObjectPtr(go);
+    if (!existing.expired()) return existing;
+    auto object = std::shared_ptr<GameObject>(go);
+    objectArray.push_back(object);
+    if (m_started) object->Start();
+    return object;
+}
+
+std::weak_ptr<GameObject> State::GetObjectPtr(GameObject* go) const {
+    for (const auto& object : objectArray) {
+        if (object.get() == go) return object;
+    }
+    return {};
 }
 
 void State::Update(float dt) {
@@ -47,7 +89,7 @@ void State::Update(float dt) {
         m_quitRequested = true;
         return;
     }
-    Camera::Update(dt);
+    if (!Camera::GetFocus()) Camera::Update(dt);
     if (input.KeyPress(SPACE_KEY)) {
         auto* zombie = new GameObject();
         zombie->AddComponent(new Zombie(*zombie));
@@ -55,8 +97,11 @@ void State::Update(float dt) {
         zombie->box.y = input.GetMouseY() + Camera::pos.y;
         AddObject(zombie);
     }
-    for (size_t i = 0; i < objectArray.size(); ++i) {
-        objectArray[i]->Update(dt);
+    // novos projeteis comecam a se mover no proximo frame.
+    const size_t count = objectArray.size();
+    for (size_t i = 0; i < count; ++i) {
+        auto object = objectArray[i];
+        if (!object->IsDead()) object->Update(dt);
     }
     for (size_t i = 0; i < objectArray.size();) {
         if (objectArray[i]->IsDead()) {
@@ -66,13 +111,20 @@ void State::Update(float dt) {
             ++i;
         }
     }
+    if (Camera::GetFocus()) Camera::Update(dt);
 }
 
 void State::Render() {
-    // desenha o fundo fixo, as duas camadas do mapa e depois os zumbis.
-    for (auto& object : objectArray) {
-        object->Render();
+    // ordena apenas o desenho, preservando a ordem de atualizacao.
+    std::vector<GameObject*> visible;
+    for (const auto& object : objectArray) {
+        if (!object->IsDead()) visible.push_back(object.get());
     }
+    std::stable_sort(visible.begin(), visible.end(), [](GameObject* a, GameObject* b) {
+        if (a->renderLayer != b->renderLayer) return a->renderLayer < b->renderLayer;
+        return a->GetRenderY() < b->GetRenderY();
+    });
+    for (auto* object : visible) object->Render();
 }
 
 bool State::QuitRequested() const { return m_quitRequested; }

@@ -1,45 +1,48 @@
 #include "GameObject.h"
+#include "Camera.h"
 #include <algorithm>
 
-GameObject::GameObject() : isDead(false) {}
+GameObject::GameObject()
+    : isDead(false), angleDeg(0.0), started(false), renderLayer(0), renderOffsetY(0.0f) {}
 
 GameObject::~GameObject() {
-    // percorre do fim para o inicio para evitar falhas de iterador
-    for (int i = components.size() - 1; i >= 0; --i) {
-        delete components[i];
-    }
-    components.clear();
+    if (Camera::GetFocus() == this) Camera::Unfollow();
+    for (auto it = components.rbegin(); it != components.rend(); ++it) delete *it;
+}
+
+void GameObject::Start() {
+    if (started) return;
+    started = true;
+    const size_t count = components.size();
+    for (size_t i = 0; i < count; ++i) components[i]->Start();
+}
+
+float GameObject::GetRenderY() const {
+    return box.y + box.h + renderOffsetY;
 }
 
 void GameObject::Update(float dt) {
-    for (auto* cpt : components) {
-        cpt->Update(dt);
-    }
+    const size_t count = components.size();
+    for (size_t i = 0; i < count; ++i) components[i]->Update(dt);
 }
 
 void GameObject::Render() {
-    for (auto* cpt : components) {
-        cpt->Render();
-    }
+    for (auto* component : components) component->Render();
 }
 
-bool GameObject::IsDead() const {
-    return isDead;
+bool GameObject::IsDead() const { return isDead; }
+void GameObject::RequestDelete() { isDead = true; }
+
+void GameObject::AddComponent(Component* component) {
+    if (!component) return;
+    components.push_back(component);
+    if (started) component->Start();
 }
 
-void GameObject::RequestDelete() {
-    isDead = true;
-}
-
-void GameObject::AddComponent(Component* cpt) {
-    if (cpt != nullptr) {
-        components.push_back(cpt);
-    }
-}
-
-void GameObject::RemoveComponent(Component* cpt) {
-    auto it = std::find(components.begin(), components.end(), cpt);
+void GameObject::RemoveComponent(Component* component) {
+    auto it = std::find(components.begin(), components.end(), component);
     if (it != components.end()) {
         components.erase(it);
+        delete component;
     }
 }

@@ -16,7 +16,7 @@ TileSet::TileSet(int tileWidth, int tileHeight, const std::string& file)
     int rows = texHeight / m_tileHeight;
     m_tileCount = columns * rows;
 
-    // define a grade de frames do Sprite para corresponder exatamente aos tiles
+    // define a grade de frames do sprite para corresponder exatamente aos tiles
     m_tileSet.SetFrameCount(columns, rows);
 }
 

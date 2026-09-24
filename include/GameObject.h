@@ -13,10 +13,16 @@ private:
 
 public:
     Rect box;
+    double angleDeg;
+    bool started;
+    int renderLayer;
+    float renderOffsetY;
 
     GameObject();
     ~GameObject();
 
+    void Start();
+    float GetRenderY() const;
     void Update(float dt);
     void Render();
     bool IsDead() const;
@@ -36,4 +42,4 @@ public:
     }
 };
 
-#endif // gAMEOBJECT_H
+#endif // gameobject_h

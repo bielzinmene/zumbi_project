@@ -26,7 +26,7 @@ OBJ_FILES = $(addprefix $(BIN_PATH)/,$(notdir $(CPP_FILES:.cpp=.o)))
 
 EXEC = JOGO
 
-# SE FOR WINDOWS
+# se for windows
 ifeq ($(OS),Windows_NT)
 RMDIR = rd /s /q
 RM = del /q
@@ -45,7 +45,7 @@ else
 
 UNAME_S := $(shell uname -s)
 
-# SE FOR MAC
+# se for mac
 ifeq ($(UNAME_S), Darwin)
 
 LIBS = -lm -framework SDL2 -framework SDL2_image -framework SDL2_mixer -framework SDL2_ttf

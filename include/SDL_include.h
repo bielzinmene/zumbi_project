@@ -20,7 +20,7 @@
     #undef INCLUDE_SDL_MIXER
 #endif
 
-// tTF
+// ttf
 #ifdef INCLUDE_SDL_TTF
     #include <SDL2/SDL_ttf.h>
     #undef INCLUDE_SDL_TTF
