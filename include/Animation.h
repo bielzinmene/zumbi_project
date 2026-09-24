@@ -10,10 +10,11 @@ public:
     int frameEnd;
     float frameTime;
     SDL_RendererFlip flip;
+    bool loop;
 
     Animation(int frameStart = 0, int frameEnd = 0, float frameTime = 0.0f,
-              SDL_RendererFlip flip = SDL_FLIP_NONE)
-        : frameStart(frameStart), frameEnd(frameEnd), frameTime(frameTime), flip(flip) {}
+              SDL_RendererFlip flip = SDL_FLIP_NONE, bool loop = true)
+        : frameStart(frameStart), frameEnd(frameEnd), frameTime(frameTime), flip(flip), loop(loop) {}
 };
 
 #endif

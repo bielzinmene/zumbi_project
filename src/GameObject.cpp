@@ -46,3 +46,12 @@ void GameObject::RemoveComponent(Component* component) {
         delete component;
     }
 }
+
+void GameObject::NotifyCollision(GameObject& other) {
+    const auto listeners = components;
+    for (Component* listener : listeners) {
+        if (std::find(components.begin(), components.end(), listener) != components.end()) {
+            listener->NotifyCollision(other);
+        }
+    }
+}

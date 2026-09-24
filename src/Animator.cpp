@@ -4,25 +4,29 @@
 
 Animator::Animator(GameObject& associated)
     : Component(associated), m_frameStart(0), m_frameEnd(0),
-      m_frameTime(0), m_currentFrame(0), m_timeElapsed(0), m_flip(SDL_FLIP_NONE) {}
+      m_frameTime(0), m_currentFrame(0), m_timeElapsed(0), m_flip(SDL_FLIP_NONE),
+      m_loop(true) {}
 
 void Animator::Update(float dt) {
-    if (m_frameTime <= 0.0f) return;
+    if (m_frameTime <= 0.0f || (!m_loop && m_currentFrame >= m_frameEnd)) return;
 
     m_timeElapsed += dt;
 
-    // recupera todos os frames transcorridos mesmo quando um frame demora mais.
     while (m_timeElapsed >= m_frameTime) {
         m_currentFrame++;
         m_timeElapsed -= m_frameTime;
 
         if (m_currentFrame > m_frameEnd) {
-            m_currentFrame = m_frameStart;
+            m_currentFrame = m_loop ? m_frameStart : m_frameEnd;
         }
 
         SpriteRenderer* renderer = associated.GetComponent<SpriteRenderer>();
         if (renderer != nullptr) {
             renderer->SetFrame(m_currentFrame, m_flip);
+        }
+        if (!m_loop && m_currentFrame >= m_frameEnd) {
+            m_timeElapsed = 0.0f;
+            break;
         }
     }
 }
@@ -43,6 +47,7 @@ void Animator::SetAnimation(const std::string& name) {
         m_frameStart = it->second.frameStart;
         m_frameEnd = it->second.frameEnd;
         m_frameTime = it->second.frameTime;
+        m_loop = it->second.loop;
 
         m_currentFrame = m_frameStart;
         m_timeElapsed = 0;

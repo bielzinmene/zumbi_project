@@ -4,20 +4,27 @@
 #include "Animator.h"
 #include "Game.h"
 #include "Gun.h"
+#include "Bullet.h"
+#include "Zombie.h"
+#include "Collider.h"
+#include "Camera.h"
+#include "AIController.h"
 #include <vector>
 
 Character* Character::player = nullptr;
 
 Character::Character(GameObject& associated, const std::string& sprite)
-    : Component(associated), m_moveSpeed(200.0f), m_health(100), m_facingLeft(false) {
+    : Component(associated), m_moveSpeed(200.0f), m_health(100), m_facingLeft(false),
+      m_hitSound("resources/audio/Hit1.wav"), m_deathSound("resources/audio/Dead.wav") {
+    m_damageCooldown.Update(1.0f);
     associated.AddComponent(new SpriteRenderer(associated, sprite, 3, 4));
     auto* animator = new Animator(associated);
-    animator->AddAnimation("idle", Animation(0, 3, 0.2f));
-    animator->AddAnimation("walking", Animation(4, 7, 0.1f));
-    animator->AddAnimation("dead", Animation(8, 11, 0.15f));
-    animator->AddAnimation("idle_left", Animation(0, 3, 0.2f, SDL_FLIP_HORIZONTAL));
-    animator->AddAnimation("walking_left", Animation(4, 7, 0.1f, SDL_FLIP_HORIZONTAL));
-    animator->AddAnimation("dead_left", Animation(8, 11, 0.15f, SDL_FLIP_HORIZONTAL));
+    animator->AddAnimation("idle", Animation(6, 9, 0.2f));
+    animator->AddAnimation("walking", Animation(0, 5, 0.1f));
+    animator->AddAnimation("dead", Animation(10, 11, 0.3f, SDL_FLIP_NONE, false));
+    animator->AddAnimation("idle_left", Animation(6, 9, 0.2f, SDL_FLIP_HORIZONTAL));
+    animator->AddAnimation("walking_left", Animation(0, 5, 0.1f, SDL_FLIP_HORIZONTAL));
+    animator->AddAnimation("dead_left", Animation(10, 11, 0.3f, SDL_FLIP_HORIZONTAL, false));
     associated.AddComponent(animator);
     animator->SetAnimation("idle");
 }
@@ -28,6 +35,9 @@ Character::~Character() {
 }
 
 void Character::Start() {
+    if (!associated.GetComponent<Collider>()) {
+        associated.AddComponent(new Collider(associated, Vec2(0.58f, 0.72f), Vec2(0.0f, 9.0f)));
+    }
     if (!m_weapon.expired()) return;
     State& state = Game::GetInstance().GetState();
     const auto owner = state.GetObjectPtr(&associated);
@@ -45,6 +55,8 @@ void Character::Update(float dt) {
         if (m_deathTimer.Get() >= 2.0f) associated.RequestDelete();
         return;
     }
+
+    m_damageCooldown.Update(dt);
 
     m_velocity = Vec2();
     std::vector<Vec2> shots;
@@ -75,3 +87,33 @@ void Character::Issue(Command task) {
     if (m_health > 0) m_commands.push(task);
 }
 void Character::Render() {}
+
+bool Character::IsAlive() const { return m_health > 0; }
+const GameObject& Character::GetObject() const { return associated; }
+
+void Character::TakeDamage(int amount) {
+    if (m_health <= 0 || m_damageCooldown.Get() < 1.0f || amount <= 0) return;
+    m_health -= amount;
+    m_damageCooldown.Restart();
+    m_hitSound.Play();
+    if (m_health <= 0) {
+        m_health = 0;
+        m_deathTimer.Restart();
+        m_deathSound.Play();
+        if (auto weapon = m_weapon.lock()) weapon->RequestDelete();
+        if (auto* animator = associated.GetComponent<Animator>()) {
+            animator->SetAnimation(m_facingLeft ? "dead_left" : "dead");
+        }
+        if (auto* collider = associated.GetComponent<Collider>()) associated.RemoveComponent(collider);
+        if (auto* ai = associated.GetComponent<AIController>()) ai->OnDeath();
+        if (player == this) Camera::Unfollow();
+    }
+}
+
+void Character::NotifyCollision(GameObject& other) {
+    if (auto* bullet = other.GetComponent<Bullet>()) {
+        if (bullet->TargetsPlayer() == (player == this)) TakeDamage(bullet->GetDamage());
+    } else if (other.GetComponent<Zombie>()) {
+        TakeDamage(10);
+    }
+}

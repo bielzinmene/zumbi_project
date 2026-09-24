@@ -7,7 +7,11 @@
 #include "Camera.h"
 #include "Character.h"
 #include "PlayerController.h"
+#include "WaveSpawner.h"
+#include "Collider.h"
+#include "Collision.h"
 #include <algorithm>
+#include <cmath>
 
 State::State() : m_quitRequested(false), m_started(false), m_assetsLoaded(false) {
     Camera::Unfollow();
@@ -49,6 +53,10 @@ void State::LoadAssets() {
     Character::player = character;
     AddObject(playerObject);
     Camera::Follow(playerObject);
+
+    auto* waveObject = new GameObject();
+    waveObject->AddComponent(new WaveSpawner(*waveObject));
+    AddObject(waveObject);
 
     m_music.Open("resources/audio/BGM.wav");
     m_music.Play(-1);
@@ -102,6 +110,31 @@ void State::Update(float dt) {
     for (size_t i = 0; i < count; ++i) {
         auto object = objectArray[i];
         if (!object->IsDead()) object->Update(dt);
+    }
+
+    // sincroniza as caixas apos todos os movimentos do frame.
+    for (const auto& object : objectArray) {
+        if (!object->IsDead()) {
+            if (auto* collider = object->GetComponent<Collider>()) collider->Update(0.0f);
+        }
+    }
+    const float radians = static_cast<float>(std::acos(-1.0) / 180.0);
+    for (size_t i = 0; i < objectArray.size(); ++i) {
+        GameObject& first = *objectArray[i];
+        if (first.IsDead()) continue;
+        for (size_t j = i + 1; j < objectArray.size(); ++j) {
+            if (first.IsDead() || !first.GetComponent<Collider>()) break;
+            GameObject& second = *objectArray[j];
+            if (second.IsDead()) continue;
+            Collider* firstBox = first.GetComponent<Collider>();
+            Collider* secondBox = second.GetComponent<Collider>();
+            if (!firstBox || !secondBox) continue;
+            if (IsColliding(firstBox->box, first.angleDeg * radians,
+                            secondBox->box, second.angleDeg * radians)) {
+                first.NotifyCollision(second);
+                second.NotifyCollision(first);
+            }
+        }
     }
     for (size_t i = 0; i < objectArray.size();) {
         if (objectArray[i]->IsDead()) {
