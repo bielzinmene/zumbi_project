@@ -2,6 +2,7 @@
 #define SPRITE_H
 
 #include <string>
+#include <memory>
 #include "Vec2.h"
 
 #define INCLUDE_SDL
@@ -31,7 +32,7 @@ public:
     void SetFrameCount(int frameCountW, int frameCountH);
 
 private:
-    SDL_Texture* m_texture;
+    std::shared_ptr<SDL_Texture> m_texture;
     int m_width;
     int m_height;
     SDL_Rect m_clipRect;

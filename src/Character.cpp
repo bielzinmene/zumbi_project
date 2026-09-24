@@ -9,6 +9,7 @@
 #include "Collider.h"
 #include "Camera.h"
 #include "AIController.h"
+#include <algorithm>
 #include <vector>
 
 Character* Character::player = nullptr;
@@ -71,6 +72,10 @@ void Character::Update(float dt) {
     }
     associated.box.x += m_velocity.x * dt;
     associated.box.y += m_velocity.y * dt;
+    associated.box.x = std::max(640.0f,
+        std::min(associated.box.x, 1920.0f - associated.box.w));
+    associated.box.y = std::max(512.0f,
+        std::min(associated.box.y, 2048.0f - associated.box.h));
     // o disparo usa a posicao atualizada do corpo.
     if (auto weapon = m_weapon.lock()) {
         if (auto* gun = weapon->GetComponent<Gun>()) {
