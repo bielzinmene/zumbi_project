@@ -25,6 +25,7 @@ private:
     float m_timeElapsed;
     std::string m_current;
     SDL_RendererFlip m_flip;
+    bool m_loop;
 };
 
 #endif

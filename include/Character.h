@@ -2,6 +2,7 @@
 #define CHARACTER_H
 #include "Component.h"
 #include "Timer.h"
+#include "Sound.h"
 #include "Vec2.h"
 #include <memory>
 #include <queue>
@@ -20,7 +21,10 @@ public:
     void Start() override;
     void Update(float dt) override;
     void Render() override;
+    void NotifyCollision(GameObject& other) override;
     void Issue(Command task);
+    bool IsAlive() const;
+    const GameObject& GetObject() const;
     static Character* player;
 
 private:
@@ -31,5 +35,9 @@ private:
     int m_health;
     bool m_facingLeft;
     Timer m_deathTimer;
+    Timer m_damageCooldown;
+    Sound m_hitSound;
+    Sound m_deathSound;
+    void TakeDamage(int amount);
 };
 #endif

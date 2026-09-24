@@ -2,6 +2,8 @@
 #include <iostream>
 #include "Resources.h"
 #include "InputManager.h"
+#include <cstdlib>
+#include <ctime>
 
 Game* Game::s_instance = nullptr;
 
@@ -13,6 +15,7 @@ Game::Game(const std::string& title, int width, int height)
         exit(EXIT_FAILURE);
     }
     s_instance = this;
+    std::srand(static_cast<unsigned>(std::time(nullptr)));
 
     // inicializacao do sdl2
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_TIMER) != 0) {
