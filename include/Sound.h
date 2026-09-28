@@ -5,6 +5,7 @@
 #define INCLUDE_SDL_MIXER
 #include "SDL_include.h"
 
+#include <memory>
 #include <string>
 
 class Sound {
@@ -19,7 +20,7 @@ public:
     bool IsOpen() const;
 
 private:
-    Mix_Chunk* m_chunk;
+    std::shared_ptr<Mix_Chunk> m_chunk;
     int m_channel;
 };
 

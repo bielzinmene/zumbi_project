@@ -10,7 +10,7 @@ Music::Music(const std::string& file) : Music() {
 
 Music::~Music() {
     Stop(0);
-    m_music = nullptr;
+    m_music.reset();
 }
 
 void Music::Open(const std::string& file) {
@@ -19,7 +19,7 @@ void Music::Open(const std::string& file) {
 
 void Music::Play(int times) {
     if (m_music != nullptr) {
-        if (Mix_PlayMusic(m_music, times) != 0) {
+        if (Mix_PlayMusic(m_music.get(), times) != 0) {
             std::cerr << "[Music] Erro ao reproduzir musica: "
                       << Mix_GetError() << std::endl;
         }

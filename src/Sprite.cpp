@@ -15,19 +15,17 @@ Sprite::Sprite(const std::string& file, int frameCountW, int frameCountH)
     Open(file);
 }
 
-Sprite::~Sprite() {
-    m_texture = nullptr;
-}
+Sprite::~Sprite() = default;
 
 
 void Sprite::Open(const std::string& file) {
     m_texture = Resources::GetImage(file);
 
-    if (m_texture == nullptr) {
+    if (!m_texture) {
         return;
     }
 
-    if (SDL_QueryTexture(m_texture, nullptr, nullptr, &m_width, &m_height) != 0) {
+    if (SDL_QueryTexture(m_texture.get(), nullptr, nullptr, &m_width, &m_height) != 0) {
         std::cerr << "[Sprite] Falha ao consultar dimensoes: " << SDL_GetError() << std::endl;
         return;
     }
@@ -43,7 +41,7 @@ void Sprite::SetClip(int x, int y, int w, int h) {
 }
 
 void Sprite::Render(float x, float y, float parallax, double angle) {
-    if (m_texture == nullptr) {
+    if (!m_texture) {
         return;
     }
 
@@ -55,7 +53,7 @@ void Sprite::Render(float x, float y, float parallax, double angle) {
     dstRect.h = static_cast<int>(std::round(m_clipRect.h * m_scale.y));
 
     SDL_Renderer* renderer = Game::GetInstance().GetRenderer();
-    SDL_RenderCopyEx(renderer, m_texture, &m_clipRect, &dstRect, angle, nullptr, m_flip);
+    SDL_RenderCopyEx(renderer, m_texture.get(), &m_clipRect, &dstRect, angle, nullptr, m_flip);
 }
 
 int Sprite::GetWidth() const {
@@ -67,7 +65,7 @@ int Sprite::GetHeight() const {
 }
 
 bool Sprite::IsOpen() const {
-    return m_texture != nullptr;
+    return static_cast<bool>(m_texture);
 }
 
 void Sprite::SetFrameCount(int frameCountW, int frameCountH) {

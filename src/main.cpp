@@ -1,12 +1,10 @@
-#include "../include/Game.h"
-#define INCLUDE_SDL
-#include "SDL_include.h"
+#include "Game.h"
+#include "TitleState.h"
 
-int main(int argc, char** argv) {
-
+int main() {
     Game& game = Game::GetInstance();
+    game.Push(new TitleState());
     game.Run();
     delete &game;
-
     return 0;
 }

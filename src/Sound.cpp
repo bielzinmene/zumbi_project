@@ -21,7 +21,7 @@ void Sound::Play(int times) {
     if (m_chunk != nullptr) {
         // times = 1 toca uma vez; loops = 0 indica sem repeticoes extras
         int loops = times - 1;
-        m_channel = Mix_PlayChannel(-1, m_chunk, loops);
+        m_channel = Mix_PlayChannel(-1, m_chunk.get(), loops);
         if (m_channel == -1) {
             std::cerr << "[Sound] Erro ao reproduzir canal de audio: " << Mix_GetError() << std::endl;
         }

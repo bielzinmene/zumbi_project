@@ -4,6 +4,7 @@
 #define INCLUDE_SDL
 #define INCLUDE_SDL_MIXER
 #include "SDL_include.h"
+#include <memory>
 #include <string>
 
 class Music {
@@ -19,7 +20,7 @@ public:
     bool IsOpen() const;
 
 private:
-    Mix_Music* m_music; //ponteiro pra musica
+    std::shared_ptr<Mix_Music> m_music;
 };
 
 #endif
